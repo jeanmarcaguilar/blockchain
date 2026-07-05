@@ -80,18 +80,6 @@
           </ul>
         </div>
         
-        <!-- Returns & Orders -->
-        <a href="<?= bc_url('customer/dashboard.php') ?>" class="amazon-returns d-none d-sm-flex flex-column text-white text-decoration-none lh-sm">
-          <span class="small font-xs opacity-75" style="font-size: 0.75rem;">Returns</span>
-          <span class="fw-bold font-sm" style="font-size: 0.85rem;">& Orders</span>
-        </a>
-        
-        <!-- Compare -->
-        <button class="btn-link text-white border-0 bg-transparent px-1 position-relative" title="Compare" id="compareBtn">
-          <i class="fas fa-balance-scale fs-5"></i>
-          <span class="badge bg-accent text-dark rounded-pill position-absolute top-0 start-100 translate-middle compare-badge" style="display:none; font-size: 0.65rem; padding: 0.2rem 0.4rem;">0</span>
-        </button>
-        
         <!-- Theme Toggle -->
         <button class="theme-toggle btn-link text-white border-0 bg-transparent px-1" title="Toggle dark mode" aria-label="Toggle dark mode">
           <i class="fas fa-moon fs-5"></i>
@@ -187,7 +175,6 @@
       <div class="section-title">Programs & Features</div>
       <ul class="section-list">
         <li><a href="<?= bc_url('customer/wishlist.php') ?>">Wishlist Items <i class="fas fa-chevron-right float-end mt-1 text-muted"></i></a></li>
-        <li><a href="#" onclick="showCompareModal(); return false;">Compare Products <i class="fas fa-chevron-right float-end mt-1 text-muted"></i></a></li>
         <li><a href="<?= bc_url('customer/blockchain.php') ?>">Verify on Blockchain <i class="fas fa-chevron-right float-end mt-1 text-muted"></i></a></li>
       </ul>
     </div>
