@@ -1,18 +1,11 @@
 <?php
 $bc_title = 'Shopping Cart';
 $bc_page = 'cart';
-$bc_role = 'customer';
-$bc_user = 'Maria Santos';
-$bc_avatar = 'https://i.pravatar.cc/150?u=maria';
-$bc_dashboard = true;
 require_once __DIR__ . '/../includes/head.php';
+require_once __DIR__ . '/../includes/public-header.php';
 ?>
-<div class="dashboard-wrapper">
-<?php require_once __DIR__ . '/../includes/dashboard-sidebar.php'; ?>
-<div class="dashboard-main">
-<?php require_once __DIR__ . '/../includes/dashboard-header.php'; ?>
-<main class="dashboard-content">
-  <h4 class="mb-4">Shopping Cart</h4>
+<div class="container py-5">
+  <h2 class="mb-4">Shopping Cart</h2>
   <div class="row g-4">
     <div class="col-lg-8">
       <div class="card-custom" id="cartItems"><div class="p-5 text-center"><div class="loading-spinner mx-auto"></div></div></div>
@@ -26,8 +19,8 @@ require_once __DIR__ . '/../includes/head.php';
       </div>
     </div>
   </div>
-</main>
-</div></div>
+</div>
+<?php require_once __DIR__ . '/../includes/public-footer.php'; ?>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   function renderCart() {

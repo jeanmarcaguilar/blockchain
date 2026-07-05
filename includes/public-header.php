@@ -1,4 +1,9 @@
-<?php require_once __DIR__ . '/config.php'; ?>
+<?php 
+require_once __DIR__ . '/config.php';
+session_start();
+$isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
+$userName = $isLoggedIn ? ($_SESSION['user_name'] ?? 'User') : 'sign in';
+?>
 
 <!-- Amazon-style Header -->
 <header class="amazon-header-wrapper">
@@ -60,23 +65,32 @@
         <!-- Account & Lists -->
         <div class="amazon-account text-white cursor-pointer dropdown">
           <div class="d-flex flex-column lh-sm dropdown-toggle" data-bs-toggle="dropdown">
-            <span class="small font-xs opacity-75" style="font-size: 0.75rem;">Hello, sign in</span>
+            <span class="small font-xs opacity-75" style="font-size: 0.75rem;">Hello, <?= $userName ?></span>
             <span class="fw-bold font-sm" style="font-size: 0.85rem;">Account & Lists</span>
           </div>
           <ul class="dropdown-menu dropdown-menu-end p-3" style="width: 240px; z-index: 1060;">
-            <div class="text-center mb-2">
-              <a href="<?= bc_url('auth/login.php') ?>" class="btn btn-accent btn-sm w-100 mb-2">Sign In</a>
-              <small class="text-muted d-block">New customer? <a href="<?= bc_url('auth/register.php') ?>">Start here.</a></small>
-            </div>
-            <li><hr class="dropdown-divider"></li>
-            <li><strong class="px-3 d-block font-xs text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Your Account</strong></li>
-            <li><a class="dropdown-item py-1" href="<?= bc_url('customer/dashboard.php') ?>"><i class="fas fa-user-cog me-2"></i>My Dashboard</a></li>
-            <li><a class="dropdown-item py-1" href="<?= bc_url('customer/wishlist.php') ?>"><i class="fas fa-heart me-2"></i>Wishlist <span class="badge bg-danger rounded-pill wishlist-badge ms-1" style="display:none">0</span></a></li>
-            <li><a class="dropdown-item py-1" href="<?= bc_url('customer/cart.php') ?>"><i class="fas fa-shopping-cart me-2"></i>Shopping Cart <span class="badge bg-primary rounded-pill cart-badge ms-1" style="display:none">0</span></a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><strong class="px-3 d-block font-xs text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Portals</strong></li>
-            <li><a class="dropdown-item py-1" href="<?= bc_url('staff/dashboard.php') ?>"><i class="fas fa-users-cog me-2"></i>Staff Portal</a></li>
-            <li><a class="dropdown-item py-1" href="<?= bc_url('admin/dashboard.php') ?>"><i class="fas fa-shield-alt me-2"></i>Admin Portal</a></li>
+            <?php if ($isLoggedIn): ?>
+              <div class="text-center mb-2">
+                <div class="mb-2"><i class="fas fa-user-circle fa-2x text-primary"></i></div>
+                <strong class="d-block"><?= $userName ?></strong>
+                <a href="<?= bc_url('auth/logout.php') ?>" class="btn btn-outline-danger btn-sm w-100 mt-2"><i class="fas fa-sign-out-alt me-1"></i>Sign Out</a>
+              </div>
+              <li><hr class="dropdown-divider"></li>
+              <li><strong class="px-3 d-block font-xs text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Your Account</strong></li>
+              <li><a class="dropdown-item py-1" href="<?= bc_url('customer/dashboard.php') ?>"><i class="fas fa-user-cog me-2"></i>My Dashboard</a></li>
+              <li><a class="dropdown-item py-1" href="<?= bc_url('customer/wishlist.php') ?>"><i class="fas fa-heart me-2"></i>Wishlist <span class="badge bg-danger rounded-pill wishlist-badge ms-1" style="display:none">0</span></a></li>
+              <li><a class="dropdown-item py-1" href="<?= bc_url('customer/cart.php') ?>"><i class="fas fa-shopping-cart me-2"></i>Shopping Cart <span class="badge bg-primary rounded-pill cart-badge ms-1" style="display:none">0</span></a></li>
+            <?php else: ?>
+              <div class="text-center mb-2">
+                <a href="<?= bc_url('auth/login.php') ?>" class="btn btn-accent btn-sm w-100 mb-2">Sign In</a>
+                <small class="text-muted d-block">New customer? <a href="<?= bc_url('auth/register.php') ?>">Start here.</a></small>
+              </div>
+              <li><hr class="dropdown-divider"></li>
+              <li><strong class="px-3 d-block font-xs text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Your Account</strong></li>
+              <li><a class="dropdown-item py-1" href="<?= bc_url('customer/dashboard.php') ?>"><i class="fas fa-user-cog me-2"></i>My Dashboard</a></li>
+              <li><a class="dropdown-item py-1" href="<?= bc_url('customer/wishlist.php') ?>"><i class="fas fa-heart me-2"></i>Wishlist <span class="badge bg-danger rounded-pill wishlist-badge ms-1" style="display:none">0</span></a></li>
+              <li><a class="dropdown-item py-1" href="<?= bc_url('customer/cart.php') ?>"><i class="fas fa-shopping-cart me-2"></i>Shopping Cart <span class="badge bg-primary rounded-pill cart-badge ms-1" style="display:none">0</span></a></li>
+            <?php endif; ?>
           </ul>
         </div>
         
@@ -104,12 +118,6 @@
       
       <!-- Subbar Left Navigation -->
       <div class="d-flex align-items-center gap-3">
-        <!-- Hamburger Menu -->
-        <button class="btn btn-hamburger text-white d-flex align-items-center gap-1 px-2 border-0 bg-transparent" id="hamburgerMenuTrigger">
-          <i class="fas fa-bars"></i>
-          <span class="fw-bold" style="font-size: 0.875rem;">All</span>
-        </button>
-        
         <!-- Custom links -->
         <div class="amazon-nav-links d-flex align-items-center gap-2">
           <a href="<?= bc_url('index.php') ?>" class="<?= ($bc_page??'')==='home'?'active':'' ?>">Home</a>
@@ -127,76 +135,6 @@
     </div>
   </div>
 </header>
-
-<!-- Amazon Drawer Sidebar Overlay -->
-<div class="amazon-sidebar-overlay" id="amazonSidebarOverlay"></div>
-
-<!-- Amazon Drawer Sidebar -->
-<aside class="amazon-sidebar-drawer" id="amazonSidebarDrawer">
-  <!-- Close Button Container -->
-  <button class="amazon-sidebar-close" id="amazonSidebarClose" aria-label="Close menu">
-    <i class="fas fa-times"></i>
-  </button>
-  
-  <!-- Header -->
-  <div class="amazon-sidebar-header">
-    <i class="fas fa-user-circle fs-3 me-2"></i>
-    <span class="fw-bold fs-5">Hello, sign in</span>
-  </div>
-  
-  <!-- Scrollable content -->
-  <div class="amazon-sidebar-content">
-    
-    <!-- Section 1: Portals & Account -->
-    <div class="amazon-sidebar-section">
-      <div class="section-title">Trending & Portals</div>
-      <ul class="section-list">
-        <li><a href="<?= bc_url('index.php') ?>">Home Page <i class="fas fa-chevron-right float-end mt-1 text-muted"></i></a></li>
-        <li><a href="<?= bc_url('customer/dashboard.php') ?>">Customer Dashboard <i class="fas fa-chevron-right float-end mt-1 text-muted"></i></a></li>
-        <li><a href="<?= bc_url('staff/dashboard.php') ?>">Staff Panel <i class="fas fa-chevron-right float-end mt-1 text-muted"></i></a></li>
-        <li><a href="<?= bc_url('admin/dashboard.php') ?>">Admin Panel <i class="fas fa-chevron-right float-end mt-1 text-muted"></i></a></li>
-      </ul>
-    </div>
-    
-    <hr class="section-divider">
-    
-    <!-- Section 2: Shop departments -->
-    <div class="amazon-sidebar-section">
-      <div class="section-title">Shop by Category</div>
-      <ul class="section-list" id="sidebarCategoriesList">
-        <li><a href="<?= bc_url('shop.php') ?>">All Departments <i class="fas fa-chevron-right float-end mt-1 text-muted"></i></a></li>
-      </ul>
-    </div>
-    
-    <hr class="section-divider">
-    
-    <!-- Section 3: Programs & Features -->
-    <div class="amazon-sidebar-section">
-      <div class="section-title">Programs & Features</div>
-      <ul class="section-list">
-        <li><a href="<?= bc_url('customer/wishlist.php') ?>">Wishlist Items <i class="fas fa-chevron-right float-end mt-1 text-muted"></i></a></li>
-        <li><a href="<?= bc_url('customer/blockchain.php') ?>">Verify on Blockchain <i class="fas fa-chevron-right float-end mt-1 text-muted"></i></a></li>
-      </ul>
-    </div>
-    
-    <hr class="section-divider">
-    
-    <!-- Section 4: Help & Settings -->
-    <div class="amazon-sidebar-section">
-      <div class="section-title">Help & Settings</div>
-      <ul class="section-list mb-5">
-        <li><a href="<?= bc_url('customer/dashboard.php') ?>">Your Account</a></li>
-        <li class="d-flex align-items-center justify-content-between px-3 py-2 text-dark" style="font-size: 0.95rem; font-weight: 500;">
-          <span>Language: English</span>
-          <span class="text-muted font-sm">🇺🇸 EN</span>
-        </li>
-        <li><a href="<?= bc_url('contact.php') ?>">Customer Service</a></li>
-        <li><a href="<?= bc_url('auth/login.php') ?>">Sign In</a></li>
-      </ul>
-    </div>
-    
-  </div>
-</aside>
 
 <script>
 // Category selector helper inside search input

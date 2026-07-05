@@ -1,9 +1,15 @@
 <?php
+require_once __DIR__ . '/../includes/config.php';
+session_start();
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+  header('Location: ' . bc_url('auth/login.php'));
+  exit;
+}
 $bc_title = 'Wishlist';
 $bc_page = 'wishlist';
 $bc_role = 'customer';
-$bc_user = 'Maria Santos';
-$bc_avatar = 'https://i.pravatar.cc/150?u=maria';
+$bc_user = $_SESSION['user_name'] ?? 'Maria Santos';
+$bc_avatar = $_SESSION['user_avatar'] ?? 'https://i.pravatar.cc/150?u=maria';
 $bc_dashboard = true;
 require_once __DIR__ . '/../includes/head.php';
 ?>

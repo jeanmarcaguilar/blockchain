@@ -1,7 +1,44 @@
 <?php
+require_once __DIR__ . '/../includes/config.php';
+session_start();
 $bc_title = 'Login';
 $bc_page = 'login';
 $bc_dashboard = false;
+
+// Handle login form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $email = $_POST['email'] ?? '';
+  $role = $_POST['role'] ?? 'customer';
+  
+  // Set session variables
+  $_SESSION['logged_in'] = true;
+  $_SESSION['user_email'] = $email;
+  $_SESSION['user_role'] = $role;
+  
+  // Set user name based on role
+  if ($role === 'customer') {
+    $_SESSION['user_name'] = 'Maria Santos';
+    $_SESSION['user_avatar'] = 'https://i.pravatar.cc/150?u=maria';
+  } elseif ($role === 'staff') {
+    $_SESSION['user_name'] = 'John Reyes';
+    $_SESSION['user_avatar'] = 'https://i.pravatar.cc/150?u=john';
+  } elseif ($role === 'admin') {
+    $_SESSION['user_name'] = 'Admin';
+    $_SESSION['user_avatar'] = 'https://i.pravatar.cc/150?u=admin';
+  }
+  
+  // Redirect based on role
+  $redirectUrls = [
+    'customer' => 'customer/dashboard.php',
+    'staff' => 'staff/dashboard.php',
+    'admin' => 'admin/dashboard.php'
+  ];
+  $redirectUrl = $redirectUrls[$role] ?? 'index.php';
+  
+  header('Location: ' . bc_url($redirectUrl));
+  exit;
+}
+
 require_once __DIR__ . '/../includes/head.php';
 ?>
 <div class="auth-wrapper">
@@ -23,12 +60,13 @@ require_once __DIR__ . '/../includes/head.php';
         ['id'=>'Admin','role'=>'admin','url'=>'admin/dashboard.php','demo'=>'admin@blockcart.com']
       ] as $tab): ?>
       <div class="tab-pane fade <?= $tab['id']==='Customer'?'show active':'' ?>" id="tab<?= $tab['id'] ?>">
-        <form data-simulate="Login successful! Redirecting..." data-redirect="<?= bc_url($tab['url']) ?>">
+        <form method="POST" action="">
+          <input type="hidden" name="role" value="<?= $tab['role'] ?>">
           <div class="mb-3">
             <label class="form-label">Email Address</label>
             <div class="input-group">
               <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-              <input type="email" class="form-control form-control-custom" value="<?= $tab['demo'] ?>" required>
+              <input type="email" name="email" class="form-control form-control-custom" value="<?= $tab['demo'] ?>" required>
             </div>
           </div>
           <div class="mb-3">
