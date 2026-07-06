@@ -1,0 +1,4 @@
+DOCUMENT_ROOT: C:/xampp/htdocs
+__DIR__: C:\xampp\htdocs\blockchain-master
+BC_BASE: /blockchain-master
+bc_asset: /blockchain-master/assets/css/main.css
