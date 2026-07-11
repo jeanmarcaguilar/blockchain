@@ -25,15 +25,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['user_avatar'] = 'https://i.pravatar.cc/150?u=admin';
   }
 
-  $redirectUrls = [
-    'customer' => 'customer/dashboard.php',
-    'staff' => 'staff/dashboard.php',
-    'admin' => 'admin/dashboard.php'
-  ];
-  $redirectUrl = $redirectUrls[$role] ?? 'index.php';
+  // Check if there's a redirect URL stored in session or from form
+  $redirectUrl = $_POST['redirect'] ?? $_SESSION['redirect_after_login'] ?? null;
+
+  if (!$redirectUrl) {
+    $redirectUrls = [
+      'customer' => 'customer/dashboard.php',
+      'staff' => 'staff/dashboard.php',
+      'admin' => 'admin/dashboard.php'
+    ];
+    $redirectUrl = $redirectUrls[$role] ?? 'index.php';
+  }
+
+  // Clear the redirect from session
+  unset($_SESSION['redirect_after_login']);
 
   header('Location: ' . bc_url($redirectUrl));
   exit;
+}
+
+// Store the intended redirect URL if provided in query parameter
+if (isset($_GET['redirect'])) {
+  $_SESSION['redirect_after_login'] = $_GET['redirect'];
 }
 
 require_once __DIR__ . '/../includes/head.php';

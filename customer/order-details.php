@@ -1,9 +1,15 @@
 <?php
+require_once __DIR__ . '/../includes/config.php';
+session_start();
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+  header('Location: ' . bc_url('auth/login.php'));
+  exit;
+}
 $bc_title = 'Order Details';
 $bc_page = 'orders';
 $bc_role = 'customer';
-$bc_user = 'Maria Santos';
-$bc_avatar = 'https://i.pravatar.cc/150?u=maria';
+$bc_user = $_SESSION['user_name'] ?? 'Maria Santos';
+$bc_avatar = $_SESSION['user_avatar'] ?? 'https://i.pravatar.cc/150?u=maria';
 $bc_dashboard = true;
 $bc_breadcrumb = ['My Orders', 'Order Details'];
 require_once __DIR__ . '/../includes/head.php';
@@ -16,10 +22,13 @@ require_once __DIR__ . '/../includes/head.php';
   <div class="text-center py-5"><div class="loading-spinner mx-auto"></div><p class="text-muted-custom mt-3">Loading order...</p></div>
 </main>
 </div></div>
+<?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const orderId = new URLSearchParams(location.search).get('id') || 'BC-2026-00143';
-  const order = BlockCartData.orders.find(o => o.id === orderId);
+  // Try to find order in localStorage first, then fall back to BlockCartData.orders
+  const localStorageOrders = JSON.parse(localStorage.getItem('bc-orders') || '[]');
+  const order = localStorageOrders.find(o => o.id === orderId) || BlockCartData.orders.find(o => o.id === orderId);
   const container = document.getElementById('orderDetailPage');
   if (!order) { container.innerHTML = '<div class="card-custom p-5 text-center"><h5>Order not found</h5><a href="orders.php" class="btn btn-primary-custom mt-3">Back to Orders</a></div>'; return; }
 

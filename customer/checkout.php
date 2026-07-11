@@ -1,9 +1,15 @@
 <?php
+require_once __DIR__ . '/../includes/config.php';
+session_start();
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+  header('Location: ' . bc_url('auth/login.php'));
+  exit;
+}
 $bc_title = 'Checkout';
 $bc_page = 'cart';
 $bc_role = 'customer';
-$bc_user = 'Maria Santos';
-$bc_avatar = 'https://i.pravatar.cc/150?u=maria';
+$bc_user = $_SESSION['user_name'] ?? 'Maria Santos';
+$bc_avatar = $_SESSION['user_avatar'] ?? 'https://i.pravatar.cc/150?u=maria';
 $bc_dashboard = true;
 $bc_breadcrumb = ['Cart', 'Checkout'];
 require_once __DIR__ . '/../includes/head.php';
@@ -20,7 +26,7 @@ require_once __DIR__ . '/../includes/head.php';
         <div class="card-custom p-4 mb-4">
           <h5 class="mb-3">Shipping Information</h5>
           <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">Full Name</label><input type="text" class="form-control form-control-custom" value="Maria Santos" required></div>
+            <div class="col-md-6"><label class="form-label">Full Name</label><input type="text" class="form-control form-control-custom" value="<?= htmlspecialchars($bc_user) ?>" required></div>
             <div class="col-md-6"><label class="form-label">Phone</label><input type="tel" class="form-control form-control-custom" value="+63 917 123 4567" required></div>
             <div class="col-12"><label class="form-label">Address</label><input type="text" class="form-control form-control-custom" value="123 Ayala Avenue, Makati City" required></div>
             <div class="col-md-6"><label class="form-label">City</label><input type="text" class="form-control form-control-custom" value="Makati City"></div>
@@ -49,6 +55,7 @@ require_once __DIR__ . '/../includes/head.php';
   </form>
 </main>
 </div></div>
+<?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('bc-cart')) localStorage.setItem('bc-cart', JSON.stringify(BlockCartData.cart));
@@ -68,9 +75,30 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('checkoutForm').addEventListener('submit', async e => {
     e.preventDefault();
+    if (!BCBlockchain.contract || !BCBlockchain.web3) {
+      BC.toast('Please connect MetaMask first to verify the transaction on the blockchain.', 'warning');
+      return;
+    }
     BC.showLoading();
     const orderId = 'BC-2026-' + String(Math.floor(Math.random()*90000)+10000);
-    await BCBlockchain.createBlockchainRecord(orderId, total, BlockCartData.currentUser.customer.email);
+    const txData = await BCBlockchain.createBlockchainRecord(orderId, total, BlockCartData.currentUser.customer.email);
+    const newOrder = {
+      id: orderId,
+      date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+      customer: BlockCartData.currentUser.customer.name,
+      items: items.length,
+      total: total,
+      status: 'pending',
+      payment: 'Cash on Delivery',
+      verified: true,
+      txHash: txData.txHash,
+      blockNumber: txData.blockNumber
+    };
+    // Save order to localStorage
+    let orders = JSON.parse(localStorage.getItem('bc-orders') || '[]');
+    orders.unshift(newOrder);
+    localStorage.setItem('bc-orders', JSON.stringify(orders));
+    
     localStorage.setItem('bc-cart', '[]');
     updateCartBadge();
     BC.hideLoading();

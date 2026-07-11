@@ -2,8 +2,14 @@
 $bc_title = 'Blockchain Verification';
 $bc_page = 'blockchain';
 $bc_role = 'customer';
-$bc_user = 'Maria Santos';
-$bc_avatar = 'https://i.pravatar.cc/150?u=maria';
+require_once __DIR__ . '/../includes/config.php';
+session_start();
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+  header('Location: ' . bc_url('auth/login.php'));
+  exit;
+}
+$bc_user = $_SESSION['user_name'] ?? 'Maria Santos';
+$bc_avatar = $_SESSION['user_avatar'] ?? 'https://i.pravatar.cc/150?u=maria';
 $bc_dashboard = true;
 require_once __DIR__ . '/../includes/head.php';
 ?>
@@ -38,7 +44,17 @@ require_once __DIR__ . '/../includes/head.php';
 </div></div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const myTx = BlockCartData.blockchainTx;
+  const localBc = JSON.parse(localStorage.getItem('bc-blockchain') || '{}');
+  const localTx = Object.keys(localBc).map(orderId => ({
+    orderId,
+    txHash: localBc[orderId].txHash,
+    blockNumber: localBc[orderId].blockNumber,
+    amount: localBc[orderId].amount || 0,
+    status: localBc[orderId].verified ? 'verified' : 'pending',
+    timestamp: localBc[orderId].timestamp,
+    customerHash: localBc[orderId].customerHash
+  }));
+  const myTx = [...localTx, ...BlockCartData.blockchainTx];
   document.getElementById('bcVerified').textContent = myTx.length;
   document.getElementById('bcContract').textContent = BlockCartData.settings.contractAddress.slice(0,10) + '...';
   document.getElementById('bcTxTable').innerHTML = myTx.map(t => `

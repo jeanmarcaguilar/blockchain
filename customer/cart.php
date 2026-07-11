@@ -1,11 +1,29 @@
 <?php
+require_once __DIR__ . '/../includes/config.php';
+session_start();
+$isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 $bc_title = 'Shopping Cart';
 $bc_page = 'cart';
-require_once __DIR__ . '/../includes/head.php';
-require_once __DIR__ . '/../includes/public-header.php';
+
+if ($isLoggedIn) {
+  $bc_role = 'customer';
+  $bc_user = $_SESSION['user_name'] ?? 'Maria Santos';
+  $bc_avatar = $_SESSION['user_avatar'] ?? 'https://i.pravatar.cc/150?u=maria';
+  $bc_dashboard = true;
+  $bc_breadcrumb = ['Cart'];
+  require_once __DIR__ . '/../includes/head.php';
+} else {
+  require_once __DIR__ . '/../includes/head.php';
+  require_once __DIR__ . '/../includes/public-header.php';
+}
 ?>
-<div class="container py-5">
-  <h2 class="mb-4">Shopping Cart</h2>
+<?php if ($isLoggedIn): ?>
+<div class="dashboard-wrapper">
+<?php require_once __DIR__ . '/../includes/dashboard-sidebar.php'; ?>
+<div class="dashboard-main">
+<?php require_once __DIR__ . '/../includes/dashboard-header.php'; ?>
+<main class="dashboard-content">
+  <h4 class="mb-4"><i class="fas fa-shopping-cart text-primary me-2"></i>Shopping Cart</h4>
   <div class="row g-4">
     <div class="col-lg-8">
       <div class="card-custom" id="cartItems"><div class="p-5 text-center"><div class="loading-spinner mx-auto"></div></div></div>
@@ -19,8 +37,28 @@ require_once __DIR__ . '/../includes/public-header.php';
       </div>
     </div>
   </div>
+</main>
+</div></div>
+<?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
+<?php else: ?>
+<div class="container py-5">
+  <h2 class="mb-4">Shopping Cart</h2>
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card-custom" id="cartItems"><div class="p-5 text-center"><div class="loading-spinner mx-auto"></div></div></div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-custom p-4 sticky-top" style="top:90px">
+        <h5 class="mb-4">Order Summary</h5>
+        <div id="cartSummary"></div>
+        <a href="<?= bc_url('auth/login.php?redirect=customer/checkout.php') ?>" class="btn btn-primary-custom w-100 btn-lg mt-3" id="checkoutBtn"><i class="fas fa-lock me-2"></i>Proceed to Checkout</a>
+        <a href="<?= bc_url('shop.php') ?>" class="btn btn-outline-custom w-100 mt-2">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
 </div>
 <?php require_once __DIR__ . '/../includes/public-footer.php'; ?>
+<?php endif; ?>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   function renderCart() {

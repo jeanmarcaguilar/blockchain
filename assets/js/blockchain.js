@@ -66,7 +66,27 @@ const BCBlockchain = {
   },
 
   async createBlockchainRecord(orderId, totalAmount, customerEmail) {
-    // Always use simulated transaction for demo (avoids MetaMask account type issues)
+    if (this.contract && this.web3) {
+      try {
+        const accounts = await this.web3.eth.getAccounts();
+        if (accounts.length > 0) {
+          const customerHash = this.generateOrderHash(orderId, customerEmail);
+          const result = await this.contract.methods.createTransaction(orderId, customerHash, totalAmount).send({ from: accounts[0] });
+          const txData = {
+            txHash: result.transactionHash,
+            blockNumber: result.blockNumber,
+            customerHash: customerHash,
+            contractAddress: this.contractAddress,
+            verified: true
+          };
+          this.saveToLocal(orderId, txData, totalAmount);
+          return txData;
+        }
+      } catch (err) {
+        console.error('Real transaction failed, falling back to simulation', err);
+      }
+    }
+    // Fallback to simulated transaction
     return this.simulateTransaction(orderId, totalAmount);
   },
 
@@ -76,7 +96,8 @@ const BCBlockchain = {
       blockNumber: Math.floor(Math.random() * 1000000) + 5800000,
       customerHash: '0x' + Array.from({ length: 8 }, () => Math.floor(Math.random() * 16).toString(16)).join('') + '...' + Array.from({ length: 4 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
       contractAddress: this.contractAddress,
-      verified: true
+      verified: true,
+      isSimulated: true
     };
     this.saveToLocal(orderId, result, totalAmount);
     return result;
@@ -106,6 +127,7 @@ const BCBlockchain = {
   renderVerificationCard(orderId) {
     const record = this.getStoredRecord(orderId);
     if (!record) return '<div class="alert alert-warning">No blockchain record found for this order.</div>';
+    const isSimulated = record.isSimulated || BlockCartData.blockchainTx.some(t => t.orderId === orderId) || !record.txHash || (record.txHash && record.txHash.includes('0x8f3b2a1c9d4e5f67'));
     return `
       <div class="blockchain-card mb-4">
         <div class="d-flex align-items-center gap-2 mb-3">
@@ -122,7 +144,10 @@ const BCBlockchain = {
         </div>
         <div class="mt-3">
           <button class="btn btn-light btn-sm" onclick="BCBlockchain.verifyOnChain('${orderId}')"><i class="fas fa-shield-alt me-1"></i> Re-verify on Chain</button>
-          <a href="https://sepolia.etherscan.io/tx/${record.txHash}" target="_blank" class="btn btn-outline-light btn-sm ms-2"><i class="fas fa-external-link-alt me-1"></i> View on Etherscan</a>
+          ${isSimulated ? 
+            `<button class="btn btn-outline-light btn-sm ms-2" onclick="BC.toast('This is a simulated demo transaction.', 'info')"><i class="fas fa-info-circle me-1"></i> Simulated Demo</button>` :
+            `<a href="https://sepolia.etherscan.io/tx/${record.txHash}" target="_blank" class="btn btn-outline-light btn-sm ms-2"><i class="fas fa-external-link-alt me-1"></i> View on Etherscan</a>`
+          }
         </div>
       </div>`;
   },
